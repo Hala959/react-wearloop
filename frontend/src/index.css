@@ -1,0 +1,51 @@
+body {
+background:  linear-gradient(to top right,  #ffffff  0%,#ffffff 1000%);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.top_nav {
+  background:#20232a;
+  height: 41px;
+}
+
+
+#stage {
+  background: url('../src/img/Herosection-Main-page\ \(2\).jpg') center center no-repeat;
+  background-size:cover;
+
+  width:100%;
+min-height: 75vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+}
+
+#stage-caption {
+  font-size: 1.4rem;
+  font-weight: 200;
+  max-width: 60rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+#stage-caption h1 {
+  color: white;
+  font-weight: bold;
+
+}
+
+
+
+.navbar-brand
+{
+    position: relative;
+    background: url(../src/img/logo.png);
+    width: 170px;
+    left: 15px;
+}
