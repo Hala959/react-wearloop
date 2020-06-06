@@ -21,10 +21,10 @@ res.status(200).json(user);
 
 router.get("/api/search/:search", async (req, res) => {
     try {
-      let projects = await Project.find({
+      let Item = await Item.find({
         title: { $regex: req.params.search, $options: "i" },
       }).populate("user");
-      if (projects.length == 0)
+      if (Item.length == 0)
         throw { message: "couldn't find any item " };
       // console.log(projects.length)
       res.status(200).json(projects);

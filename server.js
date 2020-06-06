@@ -1,43 +1,31 @@
-// load environment variables
-//=========================
+
 require("dotenv").config();
-const PORT = process.env.PORT;
-//grab our dependencies
-//=================
-const express = require("express");
-const cors = require("cors");
-const app = express();
-const path = require("path");
-
-//connect mongodb
-//=================
-
 require("./config/db");
 
-// CORS
-// ===============
-var whitelist = [
-  "http://localhost:3000",
-  "http://localhost:3005",
- 
-];
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      var message =
-        "The CORS policy for this application does not allow access from origin " +
-        origin;
-      callback(new Error(message), false);
-    }
-  },
-};
+const express = require("express");
+// const bodyParser = require("body-parser");
+const cors = require("cors");
 
-// middlewares npm i cors
-// ===============
-// app.use(cors());
-app.use(cors(corsOptions));
+const app = express();
+const port = process.env.PORT;
+
+app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
-app.use(express.static(path.join(__dirname, "./frontend")));
+
+const authUserRoute = require("./routes/auth.route");
+const ItemRoute  = require("./routes/Item.route");
+const adminRoute    = require("./routes/admin.route");
+const userPRoute    = require("./routes/user.route");
+
+
+// app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use("/api/auth", authUserRoute);
+app.use("/api/Item", ItemRoute);
+app.use("/api/admin", adminRoute);
+// app.use(userPRoute);
+
+
+
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
