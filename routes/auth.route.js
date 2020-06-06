@@ -13,26 +13,36 @@ router.get("/", (req, res) => {
 
 router.post("/signup", async (req, res) => {
   try {
-    // console.log("maram work")
-    let {  username, password, phone  } = req.body;
-    console.log(req.body)
-    let user = new User({ username, password ,phone });
-    // console.log("hi")
-
+    let { username, password, phone } = req.body;
+    let user = await new User({ username, password, phone });
     await user.save();
-    user.password = await "";
-    res.status(200).json(user);
+    user.password = "";
+
+    const payload = {
+      user,
+    };
+
+    jwt.sign(
+      payload,
+      process.env.SECRET,
+      { expiresIn: 36000000 },
+      (error, token) => {
+        if (error) throw error;
+        res.json({ token }).status(201);
+      }
+    );
   } catch (error) {
     if (error.code == 11000)
-      res.status(401).json({ message: "Email Exists!!" });
-    else res.status(401).json(error);
+      res.status(409).json({ message: "Email Exists!!" });
+    // 409 conflict
+    else res.status(500).json(error);
   }
 });
 
 router.post("/login", async (req, res) => {
   try {
-     console.log("hi")
     let user = await User.findOne({ username: req.body.username });
+    console.log(user);
     if (!user) throw { message: "Username doesn't exists" };
 
     const checkPass = await user.verifyPassword(req.body.password);
@@ -84,7 +94,6 @@ router.post("/ChangePassword", isLoggedIn, async (req, res) => {
     res.status(500).json(error);
   }
 });
-
 
 router.get("/user", isLoggedIn, async (req, res) => {
   // console.log(req.user);
