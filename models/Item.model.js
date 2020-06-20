@@ -5,6 +5,11 @@ var itemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  Color: {
+    type: String,
+    required: true,
+  },
   Category: {
     type: String,
     required: true,
@@ -20,17 +25,13 @@ var itemSchema = new mongoose.Schema({
     required: true,
   },
 
-  quantity: {
-    type: Number,
-    required: true,
-  },
   price: {
     type: Number,
     required: true,
   },
 
-  IBAN: {
-    type: Number,
+  City: {
+    type: String,
     required: true,
   },
 });

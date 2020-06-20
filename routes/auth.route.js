@@ -1,77 +1,113 @@
-  
-const express = require("express");
-const router = express.Router();
-const User = require("../model/user");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const isLoggedIn = require("../config/config");
 require("dotenv").config();
-router.get("/", async (req, res) => {
-    try {
-      let user = await User.find();
-  
-      if (!user) throw err;
-  
-      res.json({ user }).status(200);
-    } catch (err) {
-      res.json({ message: "No user" }).status(400);
-    }
-  });
-  
 
-  
-router.get("/:id", async (req, res) => {
-    try {
-      let user = await User.findById(req.params.id);
-  
-      if (!user) throw err;
-  
-      res.json({ user }).status(200);
-    } catch (err) {
-      res.json({ message: "No user" }).status(400);
-    }
-  });
-  
-  // user/
-  router.post("/registerTeacher", (req, res) => {
-    const newUser = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      password: req.body.password,
-      major: req.body.major,
-      education: req.body.education,
-      userType: "teacher",
-    };
-    console.log();
+const router = require("express").Router();
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-    User.findOne({ email: newUser.email })
-    .then((user) => {
-      // if email not incloads the database
-      if (!user) {
-        bcrypt.hash(newUser.password, 10, (err, hash) => {
-          newUser.password = hash;
-          User.create(newUser).then(() =>
-            res.json({ msg: "user created", userInf: newUser, register: true })
-          );
-        });
-      } else {
-        //if email have been used
-        res.json({ msg: "email  used", register: false });
-      }
-    })
-    .catch((err) => res.json(err));
+let User = require("../models/user.model");
+let isLoggedIn = require("../config/config");
+
+router.get("/", (req, res) => {
+  res.status(200).json({ message: "Hello, World!" });
 });
 
+router.post("/signup", async (req, res) => {
+  try {
+    let { username, password, phone } = req.body;
+    let user = await new User({ username, password, phone });
+    await user.save();
+    user.password = "";
 
-// user/
-router.post("/register", (req, res) => {
-    const newUser = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      password: req.body.password,
-      userType: "",
+    const payload = {
+      user,
     };
-    console.log();
-    // res.send(newUser);
+
+    jwt.sign(
+      payload,
+      process.env.SECRET,
+      { expiresIn: 36000000 },
+      (error, token) => {
+        if (error) throw error;
+        res.json({ token }).status(201);
+      }
+    );
+  } catch (error) {
+    if (error.code == 11000)
+      res.status(409).json({ message: "Email Exists!!" });
+    // 409 conflict
+    else res.status(500).json(error);
+  }
+});
+
+router.post("/login", async (req, res) => {
+  try {
+    let user = await User.findOne({ username: req.body.username });
+    console.log(user);
+    if (!user) throw { message: "Username doesn't exists" };
+
+    const checkPass = await user.verifyPassword(req.body.password);
+    if (!checkPass) {
+      res.status(401).json({ message: "Password Incorrect!" });
+    } else {
+      user["password"] = "";
+      const payload = {
+        user,
+      };
+
+      jwt.sign(
+        payload,
+        process.env.SECRET,
+        { expiresIn: 36000000 },
+        (error, token) => {
+          if (error) throw error;
+          res.json({ token }).status(200);
+        }
+      );
+    }
+  } catch (error) {
+    res.status(401).json(error);
+  }
+});
+
+router.post("/ChangePassword", isLoggedIn, async (req, res) => {
+  try {
+    let { _id, oldpassword, newpassword } = req.body;
+    let user = await User.findById(_id);
+    if (!user) throw { message: "username id doesn't exists" };
+
+    const checkPass = await user.verifyPassword(oldpassword);
+    if (!checkPass) {
+      res.status(401).json({ message: "Password Incorrect!" });
+    } else {
+      bcrypt.hash(newpassword, 10, async (err, pass) => {
+        if (err)
+          res.status(500).json({ message: "Couldn't update the password" });
+
+        let user = await User.findByIdAndUpdate(_id, {
+          $set: { password: pass },
+        });
+        user.password = "";
+        res.status(200).json({ user, message: "Updated !!" });
+      });
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+router.get("/user", isLoggedIn, async (req, res) => {
+  // console.log(req.user);
+
+  try {
+    let user = await User.findById(req.user._id, "-password");
+
+    if (!user) throw error;
+
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ message: "something went wrong!" });
+  }
+  //
+});
+
+module.exports = router;

@@ -1,20 +1,14 @@
-// require("dotenv").config();
-// const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-// //connect mongodb
-// //=================
-// mongoose.connect(
-//   process.env.DB,
-//   {
-//     useCreateIndex: true,
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//     useFindAndModify: false,
-//   },
-//   (err) => {
-//     if (err) throw err;
-//     console.log(`mongodb connected!`);
-//   }
-// );
+let connectionDB = mongoose.connect(process.env.DB,
+    {
+        useCreateIndex: true,
+        useFindAndModify: false,
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    },
+    () => console.log("DB ON!"),
+    (err) => console.log(err) 
+);
 
-// module.exports = mongoose;
+module.exports = connectionDB;
