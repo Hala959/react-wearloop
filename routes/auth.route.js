@@ -13,8 +13,8 @@ router.get("/", (req, res) => {
 
 router.post("/signup", async (req, res) => {
   try {
-    let { username, password, phone } = req.body;
-    let user = await new User({ username, password, phone });
+    let { email, username, password, phone } = req.body;
+    let user = await new User({ username, password, phone, email });
     await user.save();
     user.password = "";
 
@@ -41,7 +41,7 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    let user = await User.findOne({ username: req.body.username });
+    let user = await User.findOne({ email: req.body.email });
     console.log(user);
     if (!user) throw { message: "Username doesn't exists" };
 
